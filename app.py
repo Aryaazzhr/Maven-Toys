@@ -265,9 +265,18 @@ hr { border-color: rgba(77,195,255,0.15) !important; }
 # ============================================================
 @st.cache_data
 def load_data():
-    df = pd.read_csv("merged_sales_data.csv").dropna()
-    df['Product_Cost'] = df['Product_Cost'].replace(r'[\$,\s]', '', regex=True).astype(float)
-    df['Product_Price'] = df['Product_Price'].replace(r'[\$,\s]', '', regex=True).astype(float)
+    # 1. Load Raw Tables
+    sales = pd.read_csv("sales.csv").dropna()
+    products = pd.read_csv("products.csv").dropna()
+    stores = pd.read_csv("stores.csv").dropna()
+    inventory = pd.read_csv("inventory.csv").dropna()
+    
+    # 2. Clean Products
+    products['Product_Cost'] = products['Product_Cost'].replace(r'[\$,\s]', '', regex=True).astype(float)
+    products['Product_Price'] = products['Product_Price'].replace(r'[\$,\s]', '', regex=True).astype(float)
+    
+    # 3. Create Main Merged DataFrame (df)
+    df = sales.merge(products, on='Product_ID', how='left').merge(stores, on='Store_ID', how='left')
     df['Date'] = pd.to_datetime(df['Date'])
     df['Revenue'] = df['Units'] * df['Product_Price']
     df['Profit'] = df['Units'] * (df['Product_Price'] - df['Product_Cost'])
@@ -276,13 +285,8 @@ def load_data():
     df['Quarter'] = df['Date'].dt.quarter
     df['YearMonth'] = df['Date'].dt.to_period('M').astype(str)
     
-    products = pd.read_csv("products.csv").dropna()
-    products['Product_Cost'] = products['Product_Cost'].replace(r'[\$,\s]', '', regex=True).astype(float)
-    products['Product_Price'] = products['Product_Price'].replace(r'[\$,\s]', '', regex=True).astype(float)
-    
-    stores = pd.read_csv("stores.csv").dropna()
-    inventory = pd.read_csv("inventory.csv").dropna()
-    inv = inventory.merge(products, on='Product_ID').merge(stores, on='Store_ID')
+    # 4. Create Inventory DataFrame (inv)
+    inv = inventory.merge(products, on='Product_ID', how='left').merge(stores, on='Store_ID', how='left')
     inv['Inv_Value'] = inv['Stock_On_Hand'] * inv['Product_Cost']
     
     return df, products, stores, inventory, inv
