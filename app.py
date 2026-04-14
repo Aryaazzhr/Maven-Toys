@@ -856,6 +856,11 @@ with tab2:
 
     if cat_filter2 != "Semua":
         inv2 = inv2[inv2['Product_Category'] == cat_filter2]
+        
+    if dos_filter == "Kritis (<7 hari)":
+        inv2 = inv2[inv2['DoS'] < 7]
+    elif dos_filter == "Rendah (<30 hari)":
+        inv2 = inv2[inv2['DoS'] < 30]
 
     # KPIs
     total_inv_val = inv2['Inv_Value'].sum()
