@@ -166,6 +166,21 @@ div[data-testid="stTabs"] button[aria-selected="true"] {
     margin-bottom: 18px;
 }
 .chart-card:hover { border-color: rgba(184,77,255,0.4); }
+
+div[data-testid="stVerticalBlockBorderWrapper"] {
+    background: rgba(14, 30, 65, 0.6) !important;
+    border: 1px solid rgba(77, 195, 255, 0.2) !important;
+    border-radius: 14px !important;
+    padding: 18px 22px !important;
+    backdrop-filter: blur(8px) !important;
+    transition: border-color 0.25s !important;
+    margin-bottom: 0px !important;
+}
+div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+    border-color: rgba(184,77,255,0.4) !important;
+    box-shadow: 0 0 15px rgba(184,77,255,0.1) !important;
+}
+
 .chart-title { font-size: 13px; font-weight: 700; color: #dce8ff; margin-bottom: 4px; }
 .chart-sub { font-size: 11px; color: #7a9abf; margin-bottom: 14px; }
 
@@ -430,174 +445,323 @@ with tab1:
     cr1, cr2 = st.columns(2)
 
     with cr1:
-        st.markdown('''<div class="chart-card"><div class="chart-title">Profit per Kategori Produk</div>
-        <div class="chart-sub">Diagnosa: Kategori mana yang mendorong profit terbesar?</div></div>''', unsafe_allow_html=True)
+        with st.container(border=True):
 
-        colors_list = [CAT_COLORS.get(c, NEON['blue']) for c in cat_data['Product_Category']]
-        fig = go.Figure(go.Bar(
+            st.markdown('''<div class="chart-title">Profit per Kategori Produk</div>
+        <div class="chart-sub">Diagnosa: Kategori mana yang mendorong profit terbesar?</div>''', unsafe_allow_html=True)
+
+
+
+            colors_list = [CAT_COLORS.get(c, NEON['blue']) for c in cat_data['Product_Category']]
+
+            fig = go.Figure(go.Bar(
+
             x=cat_data['Product_Category'], y=cat_data['Profit'],
+
             marker=dict(
-                color=[hex_rgba(c, 0.73) for c in colors_list],
-                line=dict(width=1.5, color=colors_list),
+
+            color=[hex_rgba(c, 0.73) for c in colors_list],
+
+            line=dict(width=1.5, color=colors_list),
+
             ),
+
             text=[fmt(v) for v in cat_data['Profit']],
+
             textposition='outside',
+
             textfont=dict(color='#c0d0e8', size=10),
+
             hovertemplate='<b>%{x}</b><br>Profit: %{text}<br>Units: ' +
-                          '<br>'.join(['']*len(cat_data)) + '<extra></extra>',
-        ))
-        apply_layout(fig, height=300, showlegend=False, bargap=0.35,
-                         yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=11),
-                                   zeroline=False, tickformat='$,.0f'))
-        show_chart(fig, key='cat_profit')
+
+            '<br>'.join(['']*len(cat_data)) + '<extra></extra>',
+
+            ))
+
+            apply_layout(fig, height=300, showlegend=False, bargap=0.35,
+
+            yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=11),
+
+            zeroline=False, tickformat='$,.0f'))
+
+
+            show_chart(fig, key='cat_profit')
 
     with cr2:
-        st.markdown('''<div class="chart-card"><div class="chart-title">Margin Profit per Kategori (%)</div>
-        <div class="chart-sub">Diagnosa: Efisiensi profitabilitas per kategori</div></div>''', unsafe_allow_html=True)
+        with st.container(border=True):
 
-        margin_colors = []
-        margin_borders = []
-        for m in cat_data['Margin']:
-            if m >= 40:
-                margin_colors.append(hex_rgba(NEON['green'], 0.8))
-                margin_borders.append(NEON['green'])
-            elif m >= 30:
-                margin_colors.append(hex_rgba(NEON['purple'], 0.73))
-                margin_borders.append(NEON['purple'])
-            else:
-                margin_colors.append(hex_rgba(NEON['blue'], 0.53))
-                margin_borders.append(NEON['blue'])
+            st.markdown('''<div class="chart-title">Margin Profit per Kategori (%)</div>
+        <div class="chart-sub">Diagnosa: Efisiensi profitabilitas per kategori</div>''', unsafe_allow_html=True)
 
-        fig2 = go.Figure(go.Bar(
+
+
+            margin_colors = []
+
+            margin_borders = []
+
+            for m in cat_data['Margin']:
+                if m >= 40:
+                    margin_colors.append(hex_rgba(NEON['green'], 0.8))
+                    margin_borders.append(NEON['green'])
+                elif m >= 30:
+                    margin_colors.append(hex_rgba(NEON['purple'], 0.73))
+                    margin_borders.append(NEON['purple'])
+                else:
+                    margin_colors.append(hex_rgba(NEON['blue'], 0.53))
+                    margin_borders.append(NEON['blue'])
+
+
+            fig2 = go.Figure(go.Bar(
+
             x=cat_data['Product_Category'], y=cat_data['Margin'],
+
             marker=dict(color=margin_colors,
-                       line=dict(width=1.5, color=margin_borders)),
+
+            line=dict(width=1.5, color=margin_borders)),
+
             text=[f"{v:.1f}%" for v in cat_data['Margin']],
+
             textposition='outside',
+
             textfont=dict(color='#c0d0e8', size=10),
+
             hovertemplate='<b>%{x}</b><br>Margin: %{y:.1f}%<extra></extra>',
-        ))
-        fig2.add_hline(y=avg_margin, line_dash="dash", line_color=NEON['pink'], line_width=2,
-                      annotation_text=f"Avg: {avg_margin:.1f}%",
-                      annotation_font=dict(color=NEON['pink'], size=11),
-                      annotation_position="right")
-        apply_layout(fig2, height=300, showlegend=False, bargap=0.35,
-                          yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=11),
-                                    zeroline=False, ticksuffix='%', range=[0, max(cat_data['Margin'])*1.25]))
-        show_chart(fig2, key='cat_margin')
+
+            ))
+
+            fig2.add_hline(y=avg_margin, line_dash="dash", line_color=NEON['pink'], line_width=2,
+
+            annotation_text=f"Avg: {avg_margin:.1f}%",
+
+            annotation_font=dict(color=NEON['pink'], size=11),
+
+            annotation_position="right")
+
+            apply_layout(fig2, height=300, showlegend=False, bargap=0.35,
+
+            yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=11),
+
+            zeroline=False, ticksuffix='%', range=[0, max(cat_data['Margin'])*1.25]))
+
+
+            show_chart(fig2, key='cat_margin')
 
     # ── CHART ROW 2: Monthly Trend ──
-    st.markdown('''<div class="chart-card"><div class="chart-title">Tren Revenue & Profit Bulanan</div>
-    <div class="chart-sub">Diagnosa: Pola seasonal — Penjualan tertinggi terjadi pada periode apa?</div></div>''', unsafe_allow_html=True)
-    monthly = dff.groupby('YearMonth').agg(Revenue=('Revenue','sum'), Profit=('Profit','sum')).reset_index()
-    monthly = monthly.sort_values('YearMonth')
+    with st.container(border=True):
 
-    fig3 = go.Figure()
-    fig3.add_trace(go.Scatter(
+        st.markdown('''<div class="chart-title">Tren Revenue & Profit Bulanan</div>
+    <div class="chart-sub">Diagnosa: Pola seasonal — Penjualan tertinggi terjadi pada periode apa?</div>''', unsafe_allow_html=True)
+
+
+        monthly = dff.groupby('YearMonth').agg(Revenue=('Revenue','sum'), Profit=('Profit','sum')).reset_index()
+
+        monthly = monthly.sort_values('YearMonth')
+
+
+        fig3 = go.Figure()
+
+        fig3.add_trace(go.Scatter(
+
         x=monthly['YearMonth'], y=monthly['Revenue'], name='Revenue',
+
         line=dict(color=NEON['blue'], width=2.5, shape='spline'),
+
         fill='tozeroy', fillcolor='rgba(77,195,255,0.10)',
+
         mode='lines+markers', marker=dict(size=5, color=NEON['blue'], line=dict(width=1, color='#fff')),
+
         hovertemplate='<b>%{x}</b><br>Revenue: $%{y:,.0f}<extra></extra>',
-    ))
-    fig3.add_trace(go.Scatter(
+
+        ))
+
+        fig3.add_trace(go.Scatter(
+
         x=monthly['YearMonth'], y=monthly['Profit'], name='Profit',
+
         line=dict(color=NEON['pink'], width=2.5, shape='spline'),
+
         fill='tozeroy', fillcolor='rgba(255,77,166,0.10)',
+
         mode='lines+markers', marker=dict(size=5, color=NEON['pink'], line=dict(width=1, color='#fff')),
+
         hovertemplate='<b>%{x}</b><br>Profit: $%{y:,.0f}<extra></extra>',
-    ))
-    apply_layout(fig3, height=250,
-                      xaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=10),
-                                zeroline=False, tickangle=-45),
-                      yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=11),
-                                zeroline=False, tickformat='$,.0f'),
-                      legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1,
-                                 font=dict(size=11, color='#c0d0e8'), bgcolor='rgba(0,0,0,0)'),
-                      hovermode='x unified')
-    show_chart(fig3, key='monthly_trend')
+
+        ))
+
+        apply_layout(fig3, height=250,
+
+        xaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=10),
+
+        zeroline=False, tickangle=-45),
+
+        yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=11),
+
+        zeroline=False, tickformat='$,.0f'),
+
+        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1,
+
+        font=dict(size=11, color='#c0d0e8'), bgcolor='rgba(0,0,0,0)'),
+
+        hovermode='x unified')
+
+
+        show_chart(fig3, key='monthly_trend')
 
     # ── CHART ROW 3: Location, City Top 10, Quarterly ──
     c31, c32, c33 = st.columns(3)
 
     with c31:
-        st.markdown('''<div class="chart-card"><div class="chart-title">Revenue per Lokasi Toko</div>
-        <div class="chart-sub">Distribusi revenue berdasarkan tipe lokasi</div></div>''', unsafe_allow_html=True)
-        loc_data = dff.groupby('Store_Location')['Revenue'].sum().reset_index()
-        loc_data = loc_data.sort_values('Revenue', ascending=False)
+        with st.container(border=True):
 
-        loc_colors_map = {'Airport': NEON['blue'], 'Commercial': NEON['purple'],
-                         'Downtown': NEON['pink'], 'Residential': NEON['green']}
-        loc_c = [loc_colors_map.get(l, NEON['blue']) for l in loc_data['Store_Location']]
+            st.markdown('''<div class="chart-title">Revenue per Lokasi Toko</div>
+        <div class="chart-sub">Distribusi revenue berdasarkan tipe lokasi</div>''', unsafe_allow_html=True)
 
-        fig4 = go.Figure(go.Pie(
+
+            loc_data = dff.groupby('Store_Location')['Revenue'].sum().reset_index()
+
+            loc_data = loc_data.sort_values('Revenue', ascending=False)
+
+
+            loc_colors_map = {'Airport': NEON['blue'], 'Commercial': NEON['purple'],
+
+            'Downtown': NEON['pink'], 'Residential': NEON['green']}
+
+            loc_c = [loc_colors_map.get(l, NEON['blue']) for l in loc_data['Store_Location']]
+
+
+            fig4 = go.Figure(go.Pie(
+
             labels=loc_data['Store_Location'], values=loc_data['Revenue'],
+
             hole=0.55,
+
             marker=dict(colors=loc_c, line=dict(color=loc_c, width=2)),
+
             textfont=dict(color='#dce8ff', size=11),
+
             textinfo='label+percent',
+
             hovertemplate='<b>%{label}</b><br>Revenue: $%{value:,.0f}<br>Share: %{percent}<extra></extra>',
+
             pull=[0.03 if i == 0 else 0 for i in range(len(loc_data))],
-        ))
-        fig4.update_layout(
+
+            ))
+
+            fig4.update_layout(
+
             paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+
             font=dict(family='Inter, sans-serif', color='#c0d0e8', size=11),
+
             margin=dict(l=10, r=10, t=20, b=20),
+
             height=320, showlegend=False,
-        )
-        show_chart(fig4, key='loc_donut')
+
+            )
+
+
+            show_chart(fig4, key='loc_donut')
 
     with c32:
-        st.markdown('''<div class="chart-card"><div class="chart-title">Revenue per Kota (Top 10)</div>
-        <div class="chart-sub">Kota dengan kontribusi tertinggi</div></div>''', unsafe_allow_html=True)
-        city_data = dff.groupby('Store_City')['Revenue'].sum().nlargest(10).reset_index()
-        city_data = city_data.sort_values('Revenue', ascending=True)
+        with st.container(border=True):
 
-        # Gradient colors from dim to bright
-        n_bars = len(city_data)
-        grad_colors = [f'rgba(57,255,20,{0.3 + 0.7*(i/max(n_bars-1,1))})' for i in range(n_bars)]
+            st.markdown('''<div class="chart-title">Revenue per Kota (Top 10)</div>
+        <div class="chart-sub">Kota dengan kontribusi tertinggi</div>''', unsafe_allow_html=True)
 
-        fig5 = go.Figure(go.Bar(
+
+            city_data = dff.groupby('Store_City')['Revenue'].sum().nlargest(10).reset_index()
+
+            city_data = city_data.sort_values('Revenue', ascending=True)
+
+
+            # Gradient colors from dim to bright
+
+            n_bars = len(city_data)
+
+            grad_colors = [f'rgba(57,255,20,{0.3 + 0.7*(i/max(n_bars-1,1))})' for i in range(n_bars)]
+
+
+            fig5 = go.Figure(go.Bar(
+
             y=city_data['Store_City'], x=city_data['Revenue'],
+
             orientation='h',
+
             marker=dict(color=grad_colors, line=dict(width=1, color=NEON['green'])),
+
             text=[fmt(v) for v in city_data['Revenue']],
+
             textposition='outside',
+
             textfont=dict(color='#c0d0e8', size=9),
+
             hovertemplate='<b>%{y}</b><br>Revenue: $%{x:,.0f}<extra></extra>',
-        ))
-        apply_layout(fig5, height=320, showlegend=False, bargap=0.25,
-                          xaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=10),
-                                    zeroline=False, tickformat='$,.0f'),
-                          yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#c0d0e8', size=10),
-                                    zeroline=False))
-        show_chart(fig5, key='city_rev')
+
+            ))
+
+            apply_layout(fig5, height=320, showlegend=False, bargap=0.25,
+
+            xaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=10),
+
+            zeroline=False, tickformat='$,.0f'),
+
+            yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#c0d0e8', size=10),
+
+            zeroline=False))
+
+
+            show_chart(fig5, key='city_rev')
 
     with c33:
-        st.markdown('''<div class="chart-card"><div class="chart-title">Revenue per Kuartal</div>
-        <div class="chart-sub">Tren kuartalan 2022 vs 2023</div></div>''', unsafe_allow_html=True)
-        qdata = dff.groupby(['Year','Quarter']).agg(Revenue=('Revenue','sum'), Profit=('Profit','sum')).reset_index()
-        qdata['Label'] = qdata.apply(lambda r: f"Q{int(r['Quarter'])} {int(r['Year'])}", axis=1)
+        with st.container(border=True):
 
-        fig6 = go.Figure()
-        fig6.add_trace(go.Bar(
+            st.markdown('''<div class="chart-title">Revenue per Kuartal</div>
+        <div class="chart-sub">Tren kuartalan 2022 vs 2023</div>''', unsafe_allow_html=True)
+
+
+            qdata = dff.groupby(['Year','Quarter']).agg(Revenue=('Revenue','sum'), Profit=('Profit','sum')).reset_index()
+
+            qdata['Label'] = qdata.apply(lambda r: f"Q{int(r['Quarter'])} {int(r['Year'])}", axis=1)
+
+
+            fig6 = go.Figure()
+
+            fig6.add_trace(go.Bar(
+
             x=qdata['Label'], y=qdata['Revenue'], name='Revenue',
+
             marker=dict(color=hex_rgba(NEON['purple'], 0.73), line=dict(width=1.5, color=NEON['purple'])),
+
             hovertemplate='<b>%{x}</b><br>Revenue: $%{y:,.0f}<extra></extra>',
-        ))
-        fig6.add_trace(go.Bar(
+
+            ))
+
+            fig6.add_trace(go.Bar(
+
             x=qdata['Label'], y=qdata['Profit'], name='Profit',
+
             marker=dict(color=hex_rgba(NEON['pink'], 0.73), line=dict(width=1.5, color=NEON['pink'])),
+
             hovertemplate='<b>%{x}</b><br>Profit: $%{y:,.0f}<extra></extra>',
-        ))
-        apply_layout(fig6, height=320, barmode='group', bargap=0.3,
-                          yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=10),
-                                    zeroline=False, tickformat='$,.0f'),
-                          xaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=10),
-                                    zeroline=False, tickangle=-30),
-                          legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1,
-                                     font=dict(size=10, color='#c0d0e8'), bgcolor='rgba(0,0,0,0)'))
-        show_chart(fig6, key='quarterly')
+
+            ))
+
+            apply_layout(fig6, height=320, barmode='group', bargap=0.3,
+
+            yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=10),
+
+            zeroline=False, tickformat='$,.0f'),
+
+            xaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=10),
+
+            zeroline=False, tickangle=-30),
+
+            legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1,
+
+            font=dict(size=10, color='#c0d0e8'), bgcolor='rgba(0,0,0,0)'))
+
+
+            show_chart(fig6, key='quarterly')
 
     # ── INSIGHTS ──
     st.markdown('<div class="section-title">Diagnostic Insights — Profitabilitas & Seasonal</div>', unsafe_allow_html=True)
@@ -728,120 +892,215 @@ with tab2:
     # ── CHART ROW: Inv per Category & Stockout per Location ──
     cc1, cc2 = st.columns(2)
     with cc1:
-        st.markdown('''<div class="chart-card"><div class="chart-title">Nilai Inventori per Kategori (USD)</div>
-        <div class="chart-sub">Diagnosa: Dana terikat paling besar di kategori mana?</div></div>''', unsafe_allow_html=True)
-        inv_cat = inv2.groupby('Product_Category')['Inv_Value'].sum().reset_index()
-        inv_cat = inv_cat.sort_values('Inv_Value', ascending=False)
-        inv_colors = [hex_rgba(CAT_COLORS.get(c, NEON['blue']), 0.73) for c in inv_cat['Product_Category']]
-        inv_borders = [CAT_COLORS.get(c, NEON['blue']) for c in inv_cat['Product_Category']]
+        with st.container(border=True):
 
-        fig7 = go.Figure(go.Bar(
+            st.markdown('''<div class="chart-title">Nilai Inventori per Kategori (USD)</div>
+        <div class="chart-sub">Diagnosa: Dana terikat paling besar di kategori mana?</div>''', unsafe_allow_html=True)
+
+
+            inv_cat = inv2.groupby('Product_Category')['Inv_Value'].sum().reset_index()
+
+            inv_cat = inv_cat.sort_values('Inv_Value', ascending=False)
+
+            inv_colors = [hex_rgba(CAT_COLORS.get(c, NEON['blue']), 0.73) for c in inv_cat['Product_Category']]
+
+            inv_borders = [CAT_COLORS.get(c, NEON['blue']) for c in inv_cat['Product_Category']]
+
+
+            fig7 = go.Figure(go.Bar(
+
             x=inv_cat['Product_Category'], y=inv_cat['Inv_Value'],
+
             marker=dict(color=inv_colors, line=dict(width=1.5, color=inv_borders)),
+
             text=[f"${v:,.0f}" for v in inv_cat['Inv_Value']],
+
             textposition='outside',
+
             textfont=dict(color='#c0d0e8', size=10),
+
             hovertemplate='<b>%{x}</b><br>Inventory Value: $%{y:,.0f}<extra></extra>',
-        ))
-        apply_layout(fig7, height=300, showlegend=False, bargap=0.35,
-                          yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=11),
-                                    zeroline=False, tickformat='$,.0f'))
-        show_chart(fig7, key='inv_cat')
+
+            ))
+
+            apply_layout(fig7, height=300, showlegend=False, bargap=0.35,
+
+            yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=11),
+
+            zeroline=False, tickformat='$,.0f'))
+
+
+            show_chart(fig7, key='inv_cat')
 
     with cc2:
-        st.markdown('''<div class="chart-card"><div class="chart-title">Stockout per Lokasi Toko</div>
-        <div class="chart-sub">Diagnosa: Lokasi toko mana yang paling banyak mengalami stockout?</div></div>''', unsafe_allow_html=True)
-        stockout_loc = inv2[inv2['Stock_On_Hand'] == 0].groupby('Store_Location').size().reset_index(name='count')
-        stockout_loc = stockout_loc.sort_values('count', ascending=False)
+        with st.container(border=True):
 
-        so_loc_colors = {'Airport': NEON['blue'], 'Commercial': NEON['purple'],
-                        'Downtown': NEON['pink'], 'Residential': NEON['green']}
-        so_c = [hex_rgba(so_loc_colors.get(l, NEON['blue']), 0.73) for l in stockout_loc['Store_Location']]
-        so_b = [so_loc_colors.get(l, NEON['blue']) for l in stockout_loc['Store_Location']]
+            st.markdown('''<div class="chart-title">Stockout per Lokasi Toko</div>
+        <div class="chart-sub">Diagnosa: Lokasi toko mana yang paling banyak mengalami stockout?</div>''', unsafe_allow_html=True)
 
-        fig8 = go.Figure(go.Bar(
+
+            stockout_loc = inv2[inv2['Stock_On_Hand'] == 0].groupby('Store_Location').size().reset_index(name='count')
+
+            stockout_loc = stockout_loc.sort_values('count', ascending=False)
+
+
+            so_loc_colors = {'Airport': NEON['blue'], 'Commercial': NEON['purple'],
+
+            'Downtown': NEON['pink'], 'Residential': NEON['green']}
+
+            so_c = [hex_rgba(so_loc_colors.get(l, NEON['blue']), 0.73) for l in stockout_loc['Store_Location']]
+
+            so_b = [so_loc_colors.get(l, NEON['blue']) for l in stockout_loc['Store_Location']]
+
+
+            fig8 = go.Figure(go.Bar(
+
             x=stockout_loc['Store_Location'], y=stockout_loc['count'],
+
             marker=dict(color=so_c, line=dict(width=1.5, color=so_b)),
+
             text=stockout_loc['count'],
+
             textposition='outside',
+
             textfont=dict(color='#c0d0e8', size=11),
+
             hovertemplate='<b>%{x}</b><br>Stockout Count: %{y}<extra></extra>',
-        ))
-        apply_layout(fig8, height=300, showlegend=False, bargap=0.35,
-                          yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=11),
-                                    zeroline=False))
-        show_chart(fig8, key='stockout_loc')
+
+            ))
+
+            apply_layout(fig8, height=300, showlegend=False, bargap=0.35,
+
+            yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=11),
+
+            zeroline=False))
+
+
+            show_chart(fig8, key='stockout_loc')
 
     # ── CHART ROW 2: Inv per City & DoS Distribution ──
     cc3, cc4 = st.columns(2)
     with cc3:
-        st.markdown('''<div class="chart-card"><div class="chart-title">Top 10 Kota: Nilai Inventori (USD)</div>
-        <div class="chart-sub">Distribusi nilai inventori antar kota</div></div>''', unsafe_allow_html=True)
-        inv_city = inv2.groupby('Store_City')['Inv_Value'].sum().nlargest(10).reset_index()
-        inv_city = inv_city.sort_values('Inv_Value', ascending=True)
+        with st.container(border=True):
 
-        n_city = len(inv_city)
-        city_grad = [f'rgba(77,195,255,{0.3 + 0.7*(i/max(n_city-1,1))})' for i in range(n_city)]
+            st.markdown('''<div class="chart-title">Top 10 Kota: Nilai Inventori (USD)</div>
+        <div class="chart-sub">Distribusi nilai inventori antar kota</div>''', unsafe_allow_html=True)
 
-        fig9 = go.Figure(go.Bar(
+
+            inv_city = inv2.groupby('Store_City')['Inv_Value'].sum().nlargest(10).reset_index()
+
+            inv_city = inv_city.sort_values('Inv_Value', ascending=True)
+
+
+            n_city = len(inv_city)
+
+            city_grad = [f'rgba(77,195,255,{0.3 + 0.7*(i/max(n_city-1,1))})' for i in range(n_city)]
+
+
+            fig9 = go.Figure(go.Bar(
+
             y=inv_city['Store_City'], x=inv_city['Inv_Value'], orientation='h',
+
             marker=dict(color=city_grad, line=dict(width=1, color=NEON['blue'])),
+
             text=[f"${v:,.0f}" for v in inv_city['Inv_Value']],
+
             textposition='outside',
+
             textfont=dict(color='#c0d0e8', size=9),
+
             hovertemplate='<b>%{y}</b><br>Inventory Value: $%{x:,.0f}<extra></extra>',
-        ))
-        apply_layout(fig9, height=300, showlegend=False,
-                          xaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=10),
-                                    zeroline=False, tickformat='$,.0f'),
-                          yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#c0d0e8', size=10),
-                                    zeroline=False))
-        show_chart(fig9, key='inv_city')
+
+            ))
+
+            apply_layout(fig9, height=300, showlegend=False,
+
+            xaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=10),
+
+            zeroline=False, tickformat='$,.0f'),
+
+            yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#c0d0e8', size=10),
+
+            zeroline=False))
+
+
+            show_chart(fig9, key='inv_city')
 
     with cc4:
-        st.markdown('''<div class="chart-card"><div class="chart-title">Distribusi Days of Supply</div>
-        <div class="chart-sub">Sebaran ketahanan stok per Store-Product (capped 180 hari)</div></div>''', unsafe_allow_html=True)
-        dos_vals = inv2['DoS'].dropna()
-        dos_capped = dos_vals.clip(upper=180)
-        bins_edges = [0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 150, 180]
-        counts_h, _ = np.histogram(dos_capped, bins=bins_edges)
-        bin_labels = [f"{bins_edges[i]}-{bins_edges[i+1]}" for i in range(len(bins_edges)-1)]
+        with st.container(border=True):
 
-        # Color by risk level
-        bar_colors_dos = []
-        bar_borders_dos = []
-        for i in range(len(counts_h)):
-            if i < 1:
-                bar_colors_dos.append(hex_rgba(NEON['pink'], 0.87))
-                bar_borders_dos.append(NEON['pink'])
-            elif i < 3:
-                bar_colors_dos.append(hex_rgba(NEON['orange'], 0.73))
-                bar_borders_dos.append(NEON['orange'])
-            elif i < 5:
-                bar_colors_dos.append(hex_rgba(NEON['purple'], 0.6))
-                bar_borders_dos.append(NEON['purple'])
-            else:
-                bar_colors_dos.append(hex_rgba(NEON['blue'], 0.47))
-                bar_borders_dos.append(NEON['blue'])
+            st.markdown('''<div class="chart-title">Distribusi Days of Supply</div>
+        <div class="chart-sub">Sebaran ketahanan stok per Store-Product (capped 180 hari)</div>''', unsafe_allow_html=True)
 
-        fig10 = go.Figure(go.Bar(
+
+            dos_vals = inv2['DoS'].dropna()
+
+            dos_capped = dos_vals.clip(upper=180)
+
+            bins_edges = [0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 150, 180]
+
+            counts_h, _ = np.histogram(dos_capped, bins=bins_edges)
+
+            bin_labels = [f"{bins_edges[i]}-{bins_edges[i+1]}" for i in range(len(bins_edges)-1)]
+
+
+            # Color by risk level
+
+            bar_colors_dos = []
+
+            bar_borders_dos = []
+
+            for i in range(len(counts_h)):
+                if i < 1:
+                    bar_colors_dos.append(hex_rgba(NEON['pink'], 0.87))
+                    bar_borders_dos.append(NEON['pink'])
+                elif i < 3:
+                    bar_colors_dos.append(hex_rgba(NEON['orange'], 0.73))
+                    bar_borders_dos.append(NEON['orange'])
+                elif i < 5:
+                    bar_colors_dos.append(hex_rgba(NEON['purple'], 0.6))
+                    bar_borders_dos.append(NEON['purple'])
+                else:
+                    bar_colors_dos.append(hex_rgba(NEON['blue'], 0.47))
+                    bar_borders_dos.append(NEON['blue'])
+
+
+            fig10 = go.Figure(go.Bar(
+
             x=bin_labels, y=counts_h,
+
             marker=dict(color=bar_colors_dos, line=dict(width=1.5, color=bar_borders_dos)),
+
             text=counts_h,
+
             textposition='outside',
+
             textfont=dict(color='#c0d0e8', size=10),
+
             hovertemplate='<b>DoS %{x} hari</b><br>Frekuensi: %{y} kombinasi<extra></extra>',
-        ))
-        # Add critical threshold line
-        fig10.add_vline(x=0.5, line_dash="dash", line_color=NEON['pink'], line_width=1.5,
-                       annotation_text="Kritis", annotation_font=dict(color=NEON['pink'], size=9),
-                       annotation_position="top")
-        apply_layout(fig10, height=300, showlegend=False,
-                           xaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=10),
-                                     zeroline=False, title=dict(text='Days of Supply', font=dict(color='#7a9abf', size=11))),
-                           yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=11),
-                                     zeroline=False, title=dict(text='Frekuensi', font=dict(color='#7a9abf', size=11))))
-        show_chart(fig10, key='dos_dist')
+
+            ))
+
+            # Add critical threshold line
+
+            fig10.add_vline(x=0.5, line_dash="dash", line_color=NEON['pink'], line_width=1.5,
+
+            annotation_text="Kritis", annotation_font=dict(color=NEON['pink'], size=9),
+
+            annotation_position="top")
+
+            apply_layout(fig10, height=300, showlegend=False,
+
+            xaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=10),
+
+            zeroline=False, title=dict(text='Days of Supply', font=dict(color='#7a9abf', size=11))),
+
+            yaxis=dict(gridcolor='rgba(30,58,95,0.6)', tickfont=dict(color='#7a9abf', size=11),
+
+            zeroline=False, title=dict(text='Frekuensi', font=dict(color='#7a9abf', size=11))))
+
+
+            show_chart(fig10, key='dos_dist')
 
     # ── INSIGHTS PAGE 2 ──
     st.markdown('<div class="section-title">Diagnostic Insights — Inventory & Stockout</div>', unsafe_allow_html=True)
